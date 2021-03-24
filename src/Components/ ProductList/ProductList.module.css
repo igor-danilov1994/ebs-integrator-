@@ -1,0 +1,39 @@
+.productList table tr td {
+  text-align: center;
+  border: solid 0.5px black;
+  padding: 3px;
+  border-radius: 5px;
+}
+.productList_sort {
+  display: flex;
+}
+.productList_sort_arrows {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.productList_sortUp {
+  transform: rotate(-45deg);
+}
+.productList_sortDown {
+  transform: rotate(130deg);
+}
+.productList_checked {
+  width: 25px;
+  height: 25px;
+  margin-left: 10px;
+  display: block;
+}
+
+.sortArrow {
+  cursor: pointer;
+  width: 5px;
+  height: 5px;
+  display: block;
+  border-top: solid 1px black;
+  border-right: solid 1px black;
+  margin-left: 10px;
+}
+
+/*# sourceMappingURL=ProductList.module.css.map */
