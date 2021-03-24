@@ -17,14 +17,23 @@ export interface Product {
 
 interface ProductListPropsType {
   product: Array<Product>
-  setProductToBasket: (index: number, id: number) => void
+  setProductToBasket: (id: number, categoriesName: string, item: Product) => void
   deleteProductToBasket: (id: number) => void
   isChecked: Array<number>
+  category: Array<Category>
 }
 
-const ProductList: React.FC<ProductListPropsType> = ({ setProductToBasket, product, deleteProductToBasket, isChecked }) => {
+const ProductList: React.FC<ProductListPropsType> = ({
+                                                       category,
+                                                       setProductToBasket,
+                                                       product,
+                                                       deleteProductToBasket,
+                                                       isChecked,
+                                                     }) => {
 
-  const [allProduct, setAllProduct] = useState(product)
+  const [allProduct, setAllProduct] = useState(product);
+
+  const [showSortCategory, setShowSortCategory] = useState(false);
 
   useEffect(() => {
     setAllProduct(product);
@@ -42,18 +51,16 @@ const ProductList: React.FC<ProductListPropsType> = ({ setProductToBasket, produ
     setAllProduct(newDataProduct);
   };
 
-  let sortCategory = (value: string) => {
-    let newDataProduct = product.concat();
-    newDataProduct.sort();
 
-    if (value === 'down') {
-      newDataProduct.reverse();
-    }
-    setAllProduct(newDataProduct);
+  let sortCategory = (id: string) => {
+     let newArr = allProduct.filter( (item) => {
+      return item.category.id === id
+    } )
+    setAllProduct(newArr);
   };
 
-  let addToBasket = (index: number, id: number) => {
-    setProductToBasket(index, id);
+  let addToBasket = (id: number, categoriesName: string, item: Product) => {
+    setProductToBasket(id, categoriesName, item);
   };
 
   let deleteToToBasket = (id: number) => {
@@ -66,8 +73,19 @@ const ProductList: React.FC<ProductListPropsType> = ({ setProductToBasket, produ
       <table>
         <thead>
         <tr>
-          <td className={s.productList_sort}>Category
-            <SortComponent sortData={sortCategory} />
+          <td className={s.productList_category}> Category
+            <span onClick={ () =>setShowSortCategory(!showSortCategory)} className={`${s.sortArrow} ${s.productList_sortUp}`}> </span>
+            {showSortCategory &&
+            <div className={s.productList_category__SortBlock}>
+
+              {category.map((item: Category) =>
+                <div className={s.productList_category__box}>
+                  <input onClick={ () => sortCategory(item.id)} name={item.name} id={item.id} type='checkbox'/>
+                  <label htmlFor={item.id}> {item.name} ( {item.id} ) </label>
+                </div>
+              )}
+
+            </div>}
           </td>
           <td>Name</td>
           <td className={s.productList_sort}>Price
@@ -83,11 +101,11 @@ const ProductList: React.FC<ProductListPropsType> = ({ setProductToBasket, produ
             <td>{currentProduct.name}</td>
             <td> ${currentProduct.price}</td>
             <td>
-              <button onClick={() => addToBasket(index, currentProduct.id )}>+</button>
+              <button onClick={() => addToBasket(currentProduct.id, currentProduct.name, currentProduct) }>+</button>
               <span> Select </span>
               <button onClick={() => deleteToToBasket(currentProduct.id)}>-</button>
             </td>
-            {isChecked.includes(currentProduct.id) &&<img className={s.productList_checked} src={check} alt='check' />}
+            {isChecked.includes(currentProduct.id) && <img className={s.productList_checked} src={check} alt='check' />}
           </tr>)}
         </tbody>
       </ table>

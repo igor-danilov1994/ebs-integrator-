@@ -16,52 +16,44 @@ export interface Product {
 interface BasketPropsType {
   productToBasket: Array<Product>
   deleteProductID: number
+  quantityProduct: number
   unChecked: (id: number) => void
 }
 
-const Basket: React.FC<BasketPropsType> = ({ productToBasket, deleteProductID, unChecked }) => {
+const Basket: React.FC<BasketPropsType> = ({ productToBasket, deleteProductID, unChecked, quantityProduct }) => {
   //debugger
   const [currentProduct, setCurrentProduct] = useState<Array<Product>>([]);
   const [indexItem, setIndex] = useState(0);
-  const [count, setCount] = useState(0);
 
-  const product = useRef<Array<Product>>([]);
 
   useEffect(() => {
-    //debugger
-    if(productToBasket.length === 1){
-      debugger
-      product.current.push(productToBasket[0]);
-      setCurrentProduct(product.current);
-      setIndex(indexItem + 1);
+
+    if(productToBasket.length > 0){
+      setCurrentProduct(arr => [...arr, productToBasket[0] ] );
     }
 
-    if (productToBasket.length > 0) {
+    /*if (productToBasket.length > 0) {
       currentProduct.forEach((item: Product) => {
-        debugger
         if (item.id !== productToBasket[0].id) {
-          //debugger
-          // @ts-ignore
-          //product.current.push(productToBasket[0]);
-          //setCurrentProduct(product.current);
-          //setIndex(indexItem + 1);
         } else {
           //debugger
         }
       });
-    }
+    }*/
   }, [productToBasket]);
 
   let deleteElement = (index: number, id: number) => {
-    product.current.splice(index, 1);
-    setCurrentProduct(product.current);
+
+    let newArra = currentProduct.filter( (item: Product) => {
+      return item.id !== id
+    })
+    setCurrentProduct(newArra);
     unChecked(id)
-    setIndex(product.current.length);
   };
 
   useEffect(() => {
     if (deleteProductID) {
-      product.current.forEach((item: Product, index: number) => {
+      currentProduct.forEach((item: Product, index: number) => {
         if (item.id === deleteProductID) {
           deleteElement(index, item.id);
         }
@@ -88,7 +80,7 @@ const Basket: React.FC<BasketPropsType> = ({ productToBasket, deleteProductID, u
           <tr key={currentProduct.id}>
             <td>{currentProduct.category.name}</td>
             <td>{currentProduct.name}</td>
-            <td> {count} </td>
+            <td> {quantityProduct} </td>
             <td>{currentProduct.price}</td>
             <td>
               <button onClick={() => deleteElement(index, currentProduct.id)}>Delete</button>

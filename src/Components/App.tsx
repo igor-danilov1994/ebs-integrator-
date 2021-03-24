@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ProductList from './ ProductList/ ProductList';
 import Basket from './Basket/Basket';
-import { getProduct } from 'api/api';
+import { getCategories, getProduct } from 'api/api';
 import { Route, Redirect } from 'react-router-dom';
 
 export interface Category {
@@ -21,6 +21,9 @@ const App = () => {
   const [productToBasket, setProductToBasket] = useState<Array<Product>>([]);
   const [deleteProductID, setDeleteProductIDToBasket] = useState();
   const [isChecked, setIsChecked] = useState<Array<number>>([]);
+  const [category, setCategory] = useState<Array<Category>>([]);
+  const [quantityProduct, setQuantityProduct] = useState(1);
+
 
   // @ts-ignore
   useEffect(async () => {
@@ -28,11 +31,34 @@ const App = () => {
     setProduct(allProduct);
   }, []);
 
-  let getCurrentProduct = (index: number, id: number) => {
-    let names: Array<Product> = [];
-    names.push(product[index]);
-    checked(id);
-    setProductToBasket(names);
+  // @ts-ignore
+  useEffect(async () => {
+    let category = await getCategories();
+    setCategory(category);
+  }, []);
+
+  let getCurrentProduct = (id: number, categoriesName: string, item: Product) => {
+
+    if (productToBasket.includes(item)) {
+      /*productToBasket.forEach((item: Product) => {
+        //debugger
+        if (item.id !== id) {
+          debugger
+
+          product.forEach((item: Product) => {
+            if (item.name === categoriesName) {
+              setProductToBasket(arr => [item]);
+              checked(id);
+            }
+          });
+        }
+        debugger
+        //setQuantityProduct(quantityProduct + 1);
+      });*/
+    } else {
+      setProductToBasket(arr => [item]);
+      checked(id);
+    }
   };
 
   let deleteProductToBasket = (id: number) => {
@@ -55,11 +81,11 @@ const App = () => {
   return (
     <>
       <Route path='' render={() => <Redirect to='/ProductList' />} />
-      <Route path='/ProductList/' render={() => <ProductList setProductToBasket={getCurrentProduct}
+      <Route path='/ProductList/' render={() => <ProductList setProductToBasket={getCurrentProduct} category={category}
                                                              deleteProductToBasket={deleteProductToBasket}
                                                              product={product} isChecked={isChecked} />} />
 
-      <Basket productToBasket={productToBasket}
+      <Basket productToBasket={productToBasket} quantityProduct={quantityProduct}
               deleteProductID={deleteProductID} unChecked={unChecked} />
     </>
   );

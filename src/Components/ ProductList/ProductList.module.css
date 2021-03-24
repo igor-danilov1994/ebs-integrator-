@@ -13,6 +13,24 @@
   justify-content: center;
   align-items: center;
 }
+.productList_category {
+  display: flex;
+  position: relative;
+}
+.productList_category__box {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.productList_category__SortBlock {
+  width: 600px;
+  position: absolute;
+  border: solid 1px #000;
+  left: 80px;
+  background-color: #ffffff;
+  box-shadow: 0 3px 47px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.76);
+  z-index: 99;
+}
 .productList_sortUp {
   transform: rotate(-45deg);
 }
