@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useRef, useContext } from 'react';
+import React, { useEffect, useState, useRef, useContext, ReactPortal } from 'react';
 import s from './ProductList.module.css';
 import SortComponent from '../SortComponent/SortComponent';
 import check from '../../img/checked.svg';
-import MyContext from '../App';
 import Context from '../../index';
 
 interface Product {
@@ -23,13 +22,13 @@ interface isCheckedProduct {
 }
 
 interface ProductListPropsType {
-  setProductToBasket: (id: number, item: Product) => void
+  getCurrentProduct: (item: Product) => void
   deleteProductToBasket: (id: number) => void
   isChecked: Array<isCheckedProduct>
 }
 
 const ProductList: React.FC<ProductListPropsType> = ({
-                                                       setProductToBasket,
+                                                       getCurrentProduct,
                                                        deleteProductToBasket,
                                                        isChecked,
                                                      }) => {
@@ -39,6 +38,7 @@ const ProductList: React.FC<ProductListPropsType> = ({
   const [category, setCategory] = useState<Category[]>([]);
 
   const [showSortCategory, setShowSortCategory] = useState(false);
+  const [checkSortCategory, setCheckSortCategory] = useState<string | null>(null);
 
   const sortCategoryBlock = useRef(null);
 
@@ -57,14 +57,13 @@ const ProductList: React.FC<ProductListPropsType> = ({
     };
   }, []);
 
-  const handleOutsideClick = (e: any) => {
+  const handleOutsideClick = (e: any ): void => {
     if (!e.path.includes(sortCategoryBlock.current)) {
       setShowSortCategory(false);
     }
   };
 
-
-  let sortPrice = (value: string) => {
+  let sortPrice = (value: string): void => {
     let newDataProduct = product.concat();
 
     if (value === 'up') {
@@ -75,15 +74,15 @@ const ProductList: React.FC<ProductListPropsType> = ({
     setProduct(newDataProduct);
   };
 
-  let sortCategory = (id: string) => {
-    let newArr = product.filter((item: Product) => {
-      return item.category.id === id;
-    });
-    setProduct(newArr);
-  };
-
-  let addToBasket = (id: number, item: Product) => {
-    setProductToBasket(id, item);
+  let sortCategory = (id: string): void => {
+    if (checkSortCategory !== id) {
+      setCheckSortCategory(id);
+      setProduct(arr => arr.filter((item: Product) => item.category.id === id));
+    } else {
+      setProduct(state[1])
+      setCheckSortCategory(null);
+      setShowSortCategory(!showSortCategory)
+    }
   };
 
   return (
@@ -101,8 +100,9 @@ const ProductList: React.FC<ProductListPropsType> = ({
 
               {category.map((item: Category) =>
                 <div key={item.id} className={s.productList_category__box}>
-                  <input onClick={() => sortCategory(item.id)} name={item.name} id={item.id} type='checkbox' />
-                  <label htmlFor={item.id}> {item.name} ( {item.id} ) </label>
+                  <input onChange={(e) =>
+                    sortCategory(item.id)} checked={checkSortCategory === item.id} id={item.id} type='checkbox' />
+                  <label htmlFor={item.id}> {item.name}  </label>
                 </div>,
               )}
 
@@ -123,7 +123,7 @@ const ProductList: React.FC<ProductListPropsType> = ({
             <td>{currentProduct.name}</td>
             <td> ${currentProduct.price}</td>
             <td>
-              <button onClick={() => addToBasket(currentProduct.id, currentProduct)}>+</button>
+              <button onClick={() => getCurrentProduct(currentProduct)}>+</button>
               <span> Select </span>
               <button onClick={() => deleteProductToBasket(currentProduct.id)}>-</button>
             </td>

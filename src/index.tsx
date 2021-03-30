@@ -28,13 +28,13 @@ const Main = () => {
 
   useEffect(() => {
     (async () => {
-      const allProduct = await getProduct();
+      const product = await getProduct();
       const category = await getCategories();
 
       // @ts-ignore
       state.current.push(category);
       // @ts-ignore
-      state.current.push(allProduct);
+      state.current.push(product);
 
       if (state.current.length > 0) {
         setAllCategory(state.current);
