@@ -1,92 +1,83 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ProductList from './ ProductList/ ProductList';
 import Basket from './Basket/Basket';
-import { getCategories, getProduct } from 'api/api';
 import { Route, Redirect } from 'react-router-dom';
+import Context from '../index';
 
-export interface Category {
+interface Category {
   id: string
   name: string
 }
 
-export interface Product {
+interface Product {
   name: string;
   category: Category;
   price: number;
   id: number
 }
 
+interface isCheckedProduct {
+  id: number
+  count: number
+}
+
 const App = () => {
-  const [product, setProduct] = useState<Array<Product>>([]);
   const [productToBasket, setProductToBasket] = useState<Array<Product>>([]);
   const [deleteProductID, setDeleteProductIDToBasket] = useState();
-  const [isChecked, setIsChecked] = useState<Array<number>>([]);
-  const [category, setCategory] = useState<Array<Category>>([]);
-  const [quantityProduct, setQuantityProduct] = useState(1);
+  const [isChecked, setIsChecked] = useState<Array<isCheckedProduct>>([]);
 
+  const [count, setCount] = useState(1);
 
-  // @ts-ignore
-  useEffect(async () => {
-    const allProduct = await getProduct();
-    setProduct(allProduct);
-  }, []);
-
-  // @ts-ignore
-  useEffect(async () => {
-    let category = await getCategories();
-    setCategory(category);
-  }, []);
-
-  let getCurrentProduct = (id: number, categoriesName: string, item: Product) => {
-
-    if (productToBasket.includes(item)) {
-      /*productToBasket.forEach((item: Product) => {
-        //debugger
-        if (item.id !== id) {
-          debugger
-
-          product.forEach((item: Product) => {
-            if (item.name === categoriesName) {
-              setProductToBasket(arr => [item]);
-              checked(id);
-            }
-          });
-        }
-        debugger
-        //setQuantityProduct(quantityProduct + 1);
-      });*/
-    } else {
-      setProductToBasket(arr => [item]);
-      checked(id);
-    }
-  };
-
-  let deleteProductToBasket = (id: number) => {
-    unChecked(id);
-    setDeleteProductIDToBasket(id);
+  const getCurrentProduct = (id: number, item: Product) => {
+    setProductToBasket(arr => [item]);
+    checked(id);
   };
 
   const checked = (id: number) => {
-    if (!isChecked.includes(id)) {
-      setIsChecked(arr => [...arr, id]);
+    if (!isChecked.find(item => item.id === id)) {
+      setIsChecked(arr => [...arr, { id: id, count: count }]);
+    } else {
+      const newArr = isChecked.map(item => item.id === id ? { ...item, count: item.count! + 1 } : item);
+      setIsChecked(newArr);
     }
   };
 
+  const deleteProductToBasket = (id: number) => {
+    //приходит от ProductList
+    setDeleteProductIDToBasket(id);
+    isChecked.forEach((item: isCheckedProduct) => {
+      if (item.id === id) {
+        if (item.count! > 1) {
+          unChecked(id);
+        } else {
+          //если в isChecked есть этот id то его убираем
+          setIsChecked(arr => arr.filter(item => item.id !== id));
+        }
+      }
+    });
+  };
+
   const unChecked = (id: number) => {
-    if (isChecked.includes(id)) {
-      setIsChecked(arr => arr.filter(item => item !== id));
+    if (isChecked.find(item => item.id === id)) {
+      const newArr = isChecked.map(item => item.id === id ? { ...item, count: item.count! - 1 } : item);
+      setIsChecked(newArr);
     }
   };
 
   return (
     <>
       <Route path='' render={() => <Redirect to='/ProductList' />} />
-      <Route path='/ProductList/' render={() => <ProductList setProductToBasket={getCurrentProduct} category={category}
-                                                             deleteProductToBasket={deleteProductToBasket}
-                                                             product={product} isChecked={isChecked} />} />
+      <Route path='/ProductList/' render={() =>
+        <ProductList setProductToBasket={getCurrentProduct}
+                     deleteProductToBasket={deleteProductToBasket}
+                     isChecked={isChecked}
+        />} />
 
-      <Basket productToBasket={productToBasket} quantityProduct={quantityProduct}
-              deleteProductID={deleteProductID} unChecked={unChecked} />
+      <Basket productToBasket={productToBasket}
+              deleteProductToBasket={deleteProductToBasket}
+              deleteProductID={deleteProductID}
+              isChecked={isChecked}
+      />
     </>
   );
 };

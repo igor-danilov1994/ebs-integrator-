@@ -6,6 +6,9 @@
         border: solid 0.5px black
         padding: 3px
         border-radius: 5px
+  &_checkBlock
+    border: none !Important
+    padding: 0 !Important
   &_sort
     display: flex
     &_arrows
@@ -21,7 +24,8 @@
       justify-content: flex-start
       align-items: center
     &__SortBlock
-      width: 600px
+      width: max-content
+      padding: 5px
       position: absolute
       border: solid 1px #000
       left: 80px
@@ -41,7 +45,6 @@
   cursor: pointer
   width: 5px
   height: 5px
-  display: block
   border-top: solid 1px black
   border-right: solid 1px black
   margin-left: 10px

@@ -13,53 +13,57 @@ export interface Product {
   id: number
 }
 
+interface isCheckedProduct {
+  id: number
+  count: number
+}
+
 interface BasketPropsType {
   productToBasket: Array<Product>
   deleteProductID: number
-  quantityProduct: number
-  unChecked: (id: number) => void
+  isChecked: Array<isCheckedProduct>
+  deleteProductToBasket: (id: number) => void
 }
 
-const Basket: React.FC<BasketPropsType> = ({ productToBasket, deleteProductID, unChecked, quantityProduct }) => {
-  //debugger
-  const [currentProduct, setCurrentProduct] = useState<Array<Product>>([]);
-  const [indexItem, setIndex] = useState(0);
+const Basket: React.FC<BasketPropsType> = ({
+                                             productToBasket, deleteProductID,
+                                             isChecked, deleteProductToBasket,
+                                           }) => {
+
+  const [currentProduct, setCurrentProduct] = useState<Product[]>([]);
 
 
   useEffect(() => {
-
-    if(productToBasket.length > 0){
-      setCurrentProduct(arr => [...arr, productToBasket[0] ] );
-    }
-
-    /*if (productToBasket.length > 0) {
-      currentProduct.forEach((item: Product) => {
-        if (item.id !== productToBasket[0].id) {
-        } else {
-          //debugger
-        }
-      });
-    }*/
-  }, [productToBasket]);
-
-  let deleteElement = (index: number, id: number) => {
-
-    let newArra = currentProduct.filter( (item: Product) => {
-      return item.id !== id
-    })
-    setCurrentProduct(newArra);
-    unChecked(id)
-  };
-
-  useEffect(() => {
+    //debugger
     if (deleteProductID) {
-      currentProduct.forEach((item: Product, index: number) => {
-        if (item.id === deleteProductID) {
-          deleteElement(index, item.id);
-        }
-      });
+      const newArr = currentProduct.filter(item => item.id !== deleteProductID);
+      setCurrentProduct(newArr);
     }
   }, [deleteProductID]);
+
+  useEffect(() => {
+    if (productToBasket.length > 0) {
+      if (!currentProduct.includes(productToBasket[0])) {
+        setCurrentProduct(arr => [...arr, productToBasket[0]]);
+      }
+    }
+  }, [productToBasket]);
+
+
+  let deleteElement = (id: number) => {
+    isChecked.find((item: isCheckedProduct) => {
+      if (item.id === id) {
+        if (item.count! <= 1)
+          currentProduct.filter(item => item.id !== id);
+
+        //фильтруем isChecked и исключаем item у которго count не валидный
+        isChecked.find(item => item.id === id);
+        //setCurrentProduct(newArray);
+      } else {
+        deleteProductToBasket(id);
+      }
+    });
+  };
 
   return (
     <div className={s.productList}>
@@ -76,14 +80,14 @@ const Basket: React.FC<BasketPropsType> = ({ productToBasket, deleteProductID, u
         </tr>
         </thead>
         <tbody>
-        {currentProduct.map((currentProduct: Product, index: number) =>
-          <tr key={currentProduct.id}>
-            <td>{currentProduct.category.name}</td>
-            <td>{currentProduct.name}</td>
-            <td> {quantityProduct} </td>
-            <td>{currentProduct.price}</td>
+        {currentProduct.map((productItem: Product, index: number) =>
+          <tr key={productItem.id}>
+            <td>{productItem.category.name}</td>
+            <td>{productItem.name}</td>
+            <td> {isChecked[index].count} </td>
+            <td>{productItem.price}</td>
             <td>
-              <button onClick={() => deleteElement(index, currentProduct.id)}>Delete</button>
+              <button onClick={() => deleteElement(productItem.id)}>Delete</button>
             </td>
           </tr>)}
         </tbody>
